@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ppgen"
+version = "0.1.0"
+description = "A password/passphrase generator that uses Chinese pinyin"
+authors = [
+    {name = "Keli Hu", email = "dev@keli.hu"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: Utilities"
+]
+dependencies = [
+    "click",
+]
+
+[tool.setuptools]
+packages = ["ppgen"]
+package-dir = {"" = "src"}
+
+[project.scripts]
+ppgen = "ppgen.cli:ppgen"
+
+[tool.setuptools.package-data]
+ppgen = ["chinese_words.txt"]
