@@ -38,7 +38,14 @@ from .evaluator import evaluate_password_strength
     type=click.Choice(["text", "json"]),
     help="输出格式: text 或 json.",
 )
-def ppgen(password, count, min_length, word_count, output):
+@click.option(
+    "--character-count",
+    "-k",
+    default=2,
+    type=int,
+    help="指定单个词有几个字",
+)
+def ppgen(password, count, min_length, word_count, output, character_count):
     """
     ppgen: 一个基于常用汉语词表的密码生成工具。
     """
@@ -55,7 +62,9 @@ def ppgen(password, count, min_length, word_count, output):
                 {"password": password_str, "strength": strength_score, "hints": hints}
             )
         else:
-            password_str, hints = generate_passphrase(word_dict, min_length, word_count)
+            password_str, hints = generate_passphrase(
+                word_dict, min_length, word_count, character_count
+            )
             strength_score = evaluate_password_strength(password_str)
             passwords.append(
                 {"password": password_str, "strength": strength_score, "hints": hints}

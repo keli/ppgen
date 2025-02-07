@@ -13,11 +13,14 @@ def load_word_list():
             for line in f:
                 parts = line.strip().split("\t")
                 if len(parts) >= 2:
-                    word, pinyin = (
-                        parts[0],
-                        re.sub(r"\d", "", parts[1]),
-                    )  # 移除拼音中的数字
-                    word_dict[word] = pinyin.replace("'", "")  # 移除分隔符
+                    word = parts[0]
+                    pinyin_with_tones = parts[1]
+                    char_count = len(re.findall(r"\d", pinyin_with_tones))  # 计算字数
+                    pinyin = re.sub(r"\d", "", pinyin_with_tones)  # 移除拼音中的数字
+                    word_dict[word] = {
+                        "pinyin": pinyin.replace("'", ""),  # 移除分隔符
+                        "char_count": char_count,
+                    }
     except FileNotFoundError:
         print("Error: 词表文件未找到.")
         return None
@@ -44,7 +47,7 @@ def generate_complex_password(word_dict, min_length=10):
         sum(len(p) for p in pinyins) < min_length - 3
     ):  # 预留3个字符用于特殊字符和数字
         word = random.choice(list(word_dict.keys()))
-        pinyins.append(word_dict[word])
+        pinyins.append(word_dict[word]["pinyin"])
         chinese_chars.append(word)
 
     # 用特殊字符或数字隔开拼音
@@ -82,13 +85,14 @@ def generate_complex_password(word_dict, min_length=10):
     return "".join(password), "".join(hints)
 
 
-def generate_passphrase(word_dict, min_length=10, word_count=4):
+def generate_passphrase(word_dict, min_length=10, word_count=4, character_count=2):
     """生成 passphrase
 
     Args:
         word_dict: 汉字和拼音的字典
         min_length: 密码最小长度,默认为10
         word_count: 使用的拼音词数量,如果指定则忽略min_length。默认None时至少使用3个词。
+        character_count: 指定单个词有几个字
 
     Returns:
         tuple: (passphrase字符串, 对应的汉字提示)
@@ -99,15 +103,33 @@ def generate_passphrase(word_dict, min_length=10, word_count=4):
     if word_count is not None:
         # 使用指定数量的词，但确保至少3个
         actual_count = max(3, word_count)
-        words = random.sample(list(word_dict.keys()), actual_count)
+        # 先过滤出符合字数要求的词
+        valid_words = [
+            word
+            for word in word_dict.keys()
+            if word_dict[word]["char_count"] == character_count
+        ]
+        if not valid_words:
+            return "", "没有找到符合字数要求的词"
+
+        words = random.sample(valid_words, actual_count)
         chinese_chars.extend(words)
-        pinyins.extend([word_dict[word] for word in words])
+        pinyins.extend([word_dict[word]["pinyin"] for word in words])
     else:
         # 使用min_length模式，但确保至少3个词
         while len(pinyins) < 3 or sum(len(p) for p in pinyins) < min_length:
-            words = random.sample(list(word_dict.keys()), 1)
+            # 先过滤出符合字数要求的词
+            valid_words = [
+                word
+                for word in word_dict.keys()
+                if word_dict[word]["char_count"] == character_count
+            ]
+            if not valid_words:
+                return "", "没有找到符合字数要求的词"
+
+            words = random.sample(valid_words, 1)
             chinese_chars.extend(words)
-            pinyins.extend([word_dict[word] for word in words])
+            pinyins.extend([word_dict[word]["pinyin"] for word in words])
 
     # 构建提示信息：汉字(拼音)格式
     hints = []
