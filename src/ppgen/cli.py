@@ -45,7 +45,13 @@ from .evaluator import evaluate_password_strength
     type=int,
     help="指定单个词有几个字",
 )
-def ppgen(password, count, min_length, word_count, output, character_count):
+@click.option(
+    "--capitalize",
+    "-u",
+    is_flag=True,
+    help="将拼音中的首字母大写",
+)
+def ppgen(password, count, min_length, word_count, output, character_count, capitalize):
     """
     ppgen: 一个基于常用汉语词表的密码生成工具。
     """
@@ -56,14 +62,16 @@ def ppgen(password, count, min_length, word_count, output, character_count):
     passwords = []
     for _ in range(count):
         if password:
-            password_str, hints = generate_complex_password(word_dict, min_length)
+            password_str, hints = generate_complex_password(
+                word_dict, min_length, capitalize
+            )
             strength_score = evaluate_password_strength(password_str)
             passwords.append(
                 {"password": password_str, "strength": strength_score, "hints": hints}
             )
         else:
             password_str, hints = generate_passphrase(
-                word_dict, min_length, word_count, character_count
+                word_dict, min_length, word_count, character_count, capitalize
             )
             strength_score = evaluate_password_strength(password_str)
             passwords.append(

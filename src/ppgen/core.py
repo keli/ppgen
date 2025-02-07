@@ -27,7 +27,19 @@ def load_word_list():
     return word_dict
 
 
-def generate_complex_password(word_dict, min_length=10):
+def capitalize_pinyin(pinyin):
+    """将拼音首字母大写
+
+    Args:
+        pinyin: 拼音字符串
+
+    Returns:
+        str: 首字母大写的拼音
+    """
+    return pinyin[0].upper() + pinyin[1:] if pinyin else pinyin
+
+
+def generate_complex_password(word_dict, min_length=10, capitalize=False):
     """使用拼音生成复杂密码
 
     Args:
@@ -47,7 +59,10 @@ def generate_complex_password(word_dict, min_length=10):
         sum(len(p) for p in pinyins) < min_length - 3
     ):  # 预留3个字符用于特殊字符和数字
         word = random.choice(list(word_dict.keys()))
-        pinyins.append(word_dict[word]["pinyin"])
+        pinyin = word_dict[word]["pinyin"]
+        if capitalize:
+            pinyin = capitalize_pinyin(pinyin)
+        pinyins.append(pinyin)
         chinese_chars.append(word)
 
     # 用特殊字符或数字隔开拼音
@@ -85,7 +100,9 @@ def generate_complex_password(word_dict, min_length=10):
     return "".join(password), "".join(hints)
 
 
-def generate_passphrase(word_dict, min_length=10, word_count=4, character_count=2):
+def generate_passphrase(
+    word_dict, min_length=10, word_count=4, character_count=2, capitalize=False
+):
     """生成 passphrase
 
     Args:
@@ -114,7 +131,11 @@ def generate_passphrase(word_dict, min_length=10, word_count=4, character_count=
 
         words = random.sample(valid_words, actual_count)
         chinese_chars.extend(words)
-        pinyins.extend([word_dict[word]["pinyin"] for word in words])
+        for word in words:
+            pinyin = word_dict[word]["pinyin"]
+            if capitalize:
+                pinyin = capitalize_pinyin(pinyin)
+            pinyins.append(pinyin)
     else:
         # 使用min_length模式，但确保至少3个词
         while len(pinyins) < 3 or sum(len(p) for p in pinyins) < min_length:
@@ -129,7 +150,11 @@ def generate_passphrase(word_dict, min_length=10, word_count=4, character_count=
 
             words = random.sample(valid_words, 1)
             chinese_chars.extend(words)
-            pinyins.extend([word_dict[word]["pinyin"] for word in words])
+            for word in words:
+                pinyin = word_dict[word]["pinyin"]
+                if capitalize:
+                    pinyin = capitalize_pinyin(pinyin)
+                pinyins.append(pinyin)
 
     # 构建提示信息：汉字(拼音)格式
     hints = []
