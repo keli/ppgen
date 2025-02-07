@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ppgen"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A password/passphrase generator that uses Chinese pinyin"
 authors = [
     {name = "Keli Hu", email = "dev@keli.hu"}
@@ -33,3 +33,10 @@ ppgen = "ppgen.cli:ppgen"
 
 [tool.setuptools.package-data]
 ppgen = ["chinese_words.txt"]
+
+[tool.setuptools_scm]
+local_scheme = 'no-local-version'
+version_scheme = "post-release"
+
+[tool.setuptools.dynamic]
+version = { attr = "setuptools_scm.get_version" }
