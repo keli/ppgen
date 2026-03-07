@@ -52,12 +52,10 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False):
     special_chars = "!@#*~"
     numbers = "0123456789"
 
-    # 生成足够长的拼音组合
+    # 生成足够长的拼音组合，至少使用2个词
     pinyins = []
     chinese_chars = []
-    while (
-        sum(len(p) for p in pinyins) < min_length - 3
-    ):  # 预留3个字符用于特殊字符和数字
+    while len(pinyins) < 2 or sum(len(p) for p in pinyins) < min_length - 3:  # 预留3个字符用于特殊字符和数字
         word = random.choice(list(word_dict.keys()))
         pinyin = word_dict[word]["pinyin"]
         if capitalize:
@@ -79,15 +77,18 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False):
             password.append(sep)
             separators.append(sep)
 
-    # 在末尾添加两个特殊字符或数字
-    final_chars = []
+    # 将两个额外的特殊字符或数字插入内部随机位置（不放在末尾）
+    extra_chars = []
     for _ in range(2):
         if random.random() < 0.5:
             char = random.choice(special_chars)
         else:
             char = random.choice(numbers)
-        password.append(char)
-        final_chars.append(char)
+        # 保留末尾至少3个字符位置，确保特殊字符不出现在末尾
+        max_pos = max(0, len(password) - 3)
+        pos = random.randint(0, max_pos)
+        password.insert(pos, char)
+        extra_chars.append(char)
 
     # 构建提示信息：汉字(拼音)格式
     hints = []
@@ -95,7 +96,7 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False):
         hints.append(f"{char}({pinyin})")
         if i < len(separators):  # 添加分隔符
             hints.append(separators[i])
-    hints.extend(final_chars)  # 添加末尾的特殊字符/数字
+    hints.extend(extra_chars)  # 添加额外的特殊字符/数字
 
     return "".join(password), "".join(hints)
 
@@ -118,8 +119,8 @@ def generate_passphrase(
     chinese_chars = []
 
     if word_count is not None:
-        # 使用指定数量的词，但确保至少3个
-        actual_count = max(3, word_count)
+        # 使用指定数量的词，但确保至少2个
+        actual_count = max(2, word_count)
         # 先过滤出符合字数要求的词
         valid_words = [
             word
@@ -137,8 +138,8 @@ def generate_passphrase(
                 pinyin = capitalize_pinyin(pinyin)
             pinyins.append(pinyin)
     else:
-        # 使用min_length模式，但确保至少3个词
-        while len(pinyins) < 3 or sum(len(p) for p in pinyins) < min_length:
+        # 使用min_length模式，但确保至少2个词
+        while len(pinyins) < 2 or sum(len(p) for p in pinyins) < min_length:
             # 先过滤出符合字数要求的词
             valid_words = [
                 word
