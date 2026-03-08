@@ -77,18 +77,33 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False):
             password.append(sep)
             separators.append(sep)
 
-    # 将两个额外的特殊字符或数字插入内部随机位置（不放在末尾）
+    # 计算词边界位置（拼音之间，不能插入拼音中间）
+    boundaries = [0]
+    pos = 0
+    for i, pinyin in enumerate(pinyins):
+        pos += len(pinyin)
+        boundaries.append(pos)
+        if i < len(pinyins) - 1:
+            pos += 1  # 跳过分隔符
+            boundaries.append(pos)
+
+    # 将两个额外字符插入词边界位置：必须各含一个特殊字符和一个数字
+    # 规则: 不能在开头插入，特殊字符不能在结尾，数字可以在结尾
     extra_chars = []
-    for _ in range(2):
-        if random.random() < 0.5:
-            char = random.choice(special_chars)
+    chars_to_insert = [random.choice(special_chars), random.choice(numbers)]
+    random.shuffle(chars_to_insert)
+    for char in chars_to_insert:
+        if char in special_chars:
+            # 特殊字符: 不在开头(0), 不在结尾
+            valid_positions = [b for b in boundaries if b > 0 and b < boundaries[-1]]
         else:
-            char = random.choice(numbers)
-        # 保留末尾至少3个字符位置，确保特殊字符不出现在末尾
-        max_pos = max(0, len(password) - 3)
-        pos = random.randint(0, max_pos)
-        password.insert(pos, char)
+            # 数字: 不在开头(0), 可以在结尾
+            valid_positions = [b for b in boundaries if b > 0]
+        insert_pos = random.choice(valid_positions)
+        password.insert(insert_pos, char)
         extra_chars.append(char)
+        # 调整后续边界位置
+        boundaries = [p + 1 if p >= insert_pos else p for p in boundaries]
 
     # 构建提示信息：汉字(拼音)格式
     hints = []
