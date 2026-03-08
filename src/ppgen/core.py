@@ -39,7 +39,7 @@ def capitalize_pinyin(pinyin):
     return pinyin[0].upper() + pinyin[1:] if pinyin else pinyin
 
 
-def generate_complex_password(word_dict, min_length=10, capitalize=False):
+def generate_complex_password(word_dict, min_length=10, capitalize=False, word_count=None):
     """使用拼音生成复杂密码
 
     Args:
@@ -55,13 +55,24 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False):
     # 生成足够长的拼音组合，至少使用2个词
     pinyins = []
     chinese_chars = []
-    while len(pinyins) < 2 or sum(len(p) for p in pinyins) < min_length - 3:  # 预留3个字符用于特殊字符和数字
-        word = random.choice(list(word_dict.keys()))
-        pinyin = word_dict[word]["pinyin"]
-        if capitalize:
-            pinyin = capitalize_pinyin(pinyin)
-        pinyins.append(pinyin)
-        chinese_chars.append(word)
+    if word_count is not None:
+        # 使用指定词数量
+        target_count = max(2, word_count)
+        while len(pinyins) < target_count:
+            word = random.choice(list(word_dict.keys()))
+            pinyin = word_dict[word]["pinyin"]
+            if capitalize:
+                pinyin = capitalize_pinyin(pinyin)
+            pinyins.append(pinyin)
+            chinese_chars.append(word)
+    else:
+        while len(pinyins) < 2 or sum(len(p) for p in pinyins) < min_length - 3:  # 预留3个字符用于特殊字符和数字
+            word = random.choice(list(word_dict.keys()))
+            pinyin = word_dict[word]["pinyin"]
+            if capitalize:
+                pinyin = capitalize_pinyin(pinyin)
+            pinyins.append(pinyin)
+            chinese_chars.append(word)
 
     # 用特殊字符或数字隔开拼音
     password = []
