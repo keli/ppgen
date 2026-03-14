@@ -63,7 +63,7 @@ def ppgen(password, count, min_length, word_count, output, character_count, capi
     for _ in range(count):
         if password:
             password_str, hints = generate_complex_password(
-                word_dict, min_length, capitalize, word_count
+                word_dict, min_length, capitalize, word_count, character_count
             )
             strength_score = evaluate_password_strength(password_str)
             passwords.append(
