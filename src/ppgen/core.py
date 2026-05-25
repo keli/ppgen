@@ -15,7 +15,7 @@ def load_word_list():
                 if len(parts) >= 2:
                     word = parts[0]
                     pinyin_with_tones = parts[1]
-                    char_count = len(re.findall(r"\d", pinyin_with_tones))  # 计算字数
+                    char_count = len(word)  # 计算词条包含的汉字数
                     pinyin = re.sub(r"\d", "", pinyin_with_tones)  # 移除拼音中的数字
                     word_dict[word] = {
                         "pinyin": pinyin.replace("'", ""),  # 移除分隔符
