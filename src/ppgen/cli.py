@@ -28,7 +28,7 @@ from .evaluator import evaluate_password_strength
     "--word_count",
     "-w",
     default=4,
-    type=int,
+    type=click.IntRange(1),
     help="密码短语模式下使用的拼音词数量 (可选,默认4个词).",
 )
 @click.option(
@@ -42,7 +42,7 @@ from .evaluator import evaluate_password_strength
     "--character-count",
     "-k",
     default=2,
-    type=int,
+    type=click.IntRange(1),
     help="指定单个词有几个字",
 )
 @click.option(

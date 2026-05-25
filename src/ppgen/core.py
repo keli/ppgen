@@ -58,12 +58,12 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False, word_c
     else:
         active_dict = word_dict
 
-    # 生成足够长的拼音组合，至少使用2个词
+    # 生成足够长的拼音组合
     pinyins = []
     chinese_chars = []
     if word_count is not None:
         # 使用指定词数量
-        target_count = max(2, word_count)
+        target_count = word_count
         while len(pinyins) < target_count:
             word = random.choice(list(active_dict.keys()))
             pinyin = active_dict[word]["pinyin"]
@@ -113,6 +113,8 @@ def generate_complex_password(word_dict, min_length=10, capitalize=False, word_c
         if char in special_chars:
             # 特殊字符: 不在开头(0), 不在结尾
             valid_positions = [b for b in boundaries if b > 0 and b < boundaries[-1]]
+            if not valid_positions:
+                valid_positions = [b for b in boundaries if b > 0]
         else:
             # 数字: 不在开头(0), 可以在结尾
             valid_positions = [b for b in boundaries if b > 0]
@@ -151,8 +153,8 @@ def generate_passphrase(
     chinese_chars = []
 
     if word_count is not None:
-        # 使用指定数量的词，但确保至少2个
-        actual_count = max(2, word_count)
+        # 使用指定数量的词
+        actual_count = word_count
         # 先过滤出符合字数要求的词
         valid_words = [
             word
